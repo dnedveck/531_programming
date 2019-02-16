@@ -1,0 +1,101 @@
+---
+title: "2019-01-15, 5/3/1 2/week"
+author: "Derek"
+date: "February 2, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+
+I already started this program, and I'm two weeks in. I figured I should write up an R markdown to keep track of what my lifts are, what I'm actually getting, and lay the groundwork for easier programming out in the future.
+
+## Current training maxes
+
+```{r}
+lifts <- data.frame(lift =        c("fsquat", "bench", "dead", "press"),
+                    training_max = c(185,     210,     365,    155))
+```
+
+Percentages
+
+```{r}
+week_perc <- tibble::tribble(
+  ~week,    ~type, ~perc, ~reps,
+     1L, "warmup",   0.4,    5L,
+     1L, "warmup",   0.5,    5L,
+     1L, "warmup",   0.6,    3L,
+     1L,   "main",  0.65,    5L,
+     1L,   "main",  0.75,    5L,
+     1L,   "main",  0.85,    5L,
+     2L, "warmup",   0.4,    5L,
+     2L, "warmup",   0.5,    5L,
+     2L, "warmup",   0.6,    3L,
+     2L,   "main",   0.7,    3L,
+     2L,   "main",   0.8,    3L,
+     2L,   "main",   0.9,    3L,
+     3L, "warmup",   0.4,    5L,
+     3L, "warmup",   0.5,    5L,
+     3L, "warmup",   0.6,    3L,
+     3L,   "main",  0.75,    5L,
+     3L,   "main",  0.85,    3L,
+     3L,   "main",  0.95,    1L
+  )
+
+
+```
+
+```{r}
+prog.ls <- apply(X = lifts, 1, function(x){
+  tmp <- week_perc
+  weights <- (week_perc$perc * as.integer(x[2]))
+  tmp$lift <- x[1]
+  tmp$weight <- round(weights / 5) * 5
+  return(tmp)
+})
+
+names(prog.ls) <- lifts$lift
+```
+
+
+There we go, now I can copy those numbers into my training log
+
+
+## Looking at calc1RM over the weeks
+
+```{r}
+accomplished <- tibble::tribble(
+                 ~week,   ~lift, ~weight, ~reps,
+                    1L, "fsquat",    160L,    8L,
+                    1L, "bench",    180L,    8L,
+                    1L,  "dead",    310L,    7L,
+                    1L, "press",    135L,    6L,
+                    2L, "fsquat",    165L,    6L,
+                    2L, "bench",    190L,    6L,
+                    2L,  "dead",    330L,    6L,
+                    2L, "press",    140L,    7L,
+                    3L, "fsquat",    175L,    5,
+                    3L, "bench",    200L,    5,
+                    3L,  "dead",    345L,    6,
+                    3L, "press",    145L,    4
+                 ) %>% 
+  mutate(calc1RM = weight*reps*0.0333 + weight)
+
+```
+
+
+Let's make a plot!
+
+```{r}
+library(ggplot2)
+
+accomplished %>% 
+  ggplot(aes(x = as.factor(week), y = calc1RM)) + 
+  geom_line(aes(group = lift, color = lift), size = 2) +
+  labs(x = "Week",
+       y = "Calculated 1RM")
+```
+

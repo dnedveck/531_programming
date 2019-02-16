@@ -1,0 +1,37 @@
+---
+title: "5/3/1 Two-day program"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(tidyr)
+```
+
+
+Enter in your training 1RM (pg.21):
+
+$$
+weight * reps * 0.0333 + weight = \texttt{1RM}
+$$
+Then 
+
+$$
+\texttt{1RM} * 0.9 = \texttt{1RM Training Max}
+$$
+```{r}
+c(squat = 185, bench = 210, press = 155, dead = 365)
+
+
+```
+
+```{r}
+data.frame(lift = c("squat", "bench", "dead", "press"),
+           weight = c(205, 225, 365, 155),
+           reps = c(3, 2, 3, 3)) %>% 
+  mutate(one_RM = weight*reps*0.0333 + weight,
+          training_max = 0.9*one_RM)
+```
+
