@@ -99,3 +99,30 @@ accomplished %>%
        y = "Calculated 1RM")
 ```
 
+## Saving data
+
+Adding in a date column to match with week. 
+
+```{r}
+dates <- tibble::tribble(
+  ~week, ~date,
+   1,     "2019-01-15",
+   2,     "2019-01-22",
+   3,     "2019-02-05"
+) %>%
+  mutate(date = ymd(date))
+```
+
+
+```{r}
+lift_tbl <- left_join(accomplished, dates) %>% 
+  select(week, date, lift:calc1RM)
+```
+
+```{r}
+write.csv(x = lift_tbl, file = "data/2019-01-15_lift-data.csv",
+          quote = FALSE, row.names = FALSE)
+```
+
+
+

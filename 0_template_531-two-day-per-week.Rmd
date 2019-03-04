@@ -3,15 +3,20 @@ title: "5/3/1 Two-day program"
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+library(magrittr)
 library(dplyr)
 library(tidyr)
+library(ggplot2)
 ```
 
 
-Enter in your training 1RM (pg.21):
+## Setting Training Max
+
+Find your training 1RM (pg.21):
 
 $$
 weight * reps * 0.0333 + weight = \texttt{1RM}
@@ -21,17 +26,128 @@ Then
 $$
 \texttt{1RM} * 0.9 = \texttt{1RM Training Max}
 $$
+
+### Training maxes
+
+If incrementing from a previous round, add 10 to squat / deadlift, 5 to bench or overhead
+
+**Training maxes:**
+
 ```{r}
-c(squat = 185, bench = 210, press = 155, dead = 365)
+lifts <- data.frame(lift =        c("fsquat", "bench", "dead", "press"),
+                    training_max = c(195,     215,     375,    165))
+```
+
+## Calculating lifts
+
+Percentages
+
+```{r}
+week_perc <- tibble::tribble(
+  ~week,    ~type, ~perc, ~reps,
+     1L, "warmup",   0.4,    5L,
+     1L, "warmup",   0.5,    5L,
+     1L, "warmup",   0.6,    3L,
+     1L,   "main",  0.65,    5L,
+     1L,   "main",  0.75,    5L,
+     1L,   "main",  0.85,    5L,
+     2L, "warmup",   0.4,    5L,
+     2L, "warmup",   0.5,    5L,
+     2L, "warmup",   0.6,    3L,
+     2L,   "main",   0.7,    3L,
+     2L,   "main",   0.8,    3L,
+     2L,   "main",   0.9,    3L,
+     3L, "warmup",   0.4,    5L,
+     3L, "warmup",   0.5,    5L,
+     3L, "warmup",   0.6,    3L,
+     3L,   "main",  0.75,    5L,
+     3L,   "main",  0.85,    3L,
+     3L,   "main",  0.95,    1L
+  )
 
 
 ```
 
+Making a list for the progression of each of the lifts:
+
 ```{r}
-data.frame(lift = c("squat", "bench", "dead", "press"),
-           weight = c(205, 225, 365, 155),
-           reps = c(3, 2, 3, 3)) %>% 
-  mutate(one_RM = weight*reps*0.0333 + weight,
-          training_max = 0.9*one_RM)
+prog.ls <- apply(X = lifts, 1, function(x){
+  tmp <- week_perc
+  weights <- (week_perc$perc * as.integer(x[2]))
+  tmp$lift <- x[1]
+  tmp$weight <- round(weights / 5) * 5
+  return(tmp)
+})
+
+names(prog.ls) <- lifts$lift
 ```
+
+
+## completed lifts
+
+code to create the tribble to input my reps, run interactively:
+
+```{r eval=FALSE}
+lapply(prog.ls, function(x){
+  x %>% filter(type == "main") %>%
+    group_by(week) %>% 
+    slice(3) %>% 
+    ungroup %>% 
+    select(week, lift, weight)
+}) %>% bind_rows %>% 
+  arrange(week) %>% 
+  mutate(reps = NA) %>% 
+  datapasta::dpasta()
+```
+
+handcrafted data entry: 
+
+```{r}
+accomplished <- tibble::tribble(
+  # replace with tibble created above                     
+  ) %>% 
+  mutate(calc1RM = weight*reps*0.0333 + weight) %>% 
+  filter(complete.cases(.))
+
+```
+
+
+Let's make a plot!
+
+```{r}
+library(ggplot2)
+
+accomplished %>% 
+  ggplot(aes(x = as.factor(week), y = calc1RM)) + 
+  geom_line(aes(group = lift, color = lift), size = 2) +
+  labs(x = "Week",
+       y = "Calculated 1RM")
+```
+
+
+## Saving data
+
+Adding in a date column to match with week. 
+
+```{r}
+dates <- tibble::tribble(
+  ~week, ~date,
+   1,     "2019-02-12",
+   2,     "2019-02-19",
+   3,     "2019-02-26"
+) %>%
+  mutate(date = ymd(date))
+```
+
+
+```{r}
+lift_tbl <- left_join(accomplished, dates) %>% 
+  select(week, date, lift:calc1RM)
+```
+
+```{r}
+write.csv(x = lift_tbl, file = "data/2019-template_lift-data.csv",
+          quote = FALSE, row.names = FALSE)
+```
+
 

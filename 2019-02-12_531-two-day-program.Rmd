@@ -10,6 +10,7 @@ library(magrittr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(lubridate)
 ```
 
 
@@ -98,20 +99,23 @@ handcrafted data entry:
 ```{r}
 accomplished <- tibble::tribble(
                        ~week,    ~lift, ~weight, ~reps,
-                          1L, "fsquat",     165,    NA,
-                          1L,  "bench",     185,    NA,
-                          1L,   "dead",     320,    NA,
-                          1L,  "press",     140,    NA,
-                          2L, "fsquat",     175,    NA,
-                          2L,  "bench",     195,    NA,
-                          2L,   "dead",     340,    NA,
-                          2L,  "press",     150,    NA,
-                          3L, "fsquat",     185,    NA,
-                          3L,  "bench",     205,    NA,
-                          3L,   "dead",     355,    NA,
-                          3L,  "press",     155,    NA
+                          1L, "fsquat",     165,    7,
+                          1L,  "bench",     159,    12,
+                          1L,   "dead",     320,    5,
+                          1L,  "press",     140,    5,
+                       
+                          2L, "fsquat",     175,    6,
+                          2L,  "bench",     195,    NA, # missed a day
+                          2L,   "dead",     340,    6,
+                          2L,  "press",     150,    4,
+                       
+                          3L, "fsquat",     185,    5,
+                          3L,  "bench",     205,    5,
+                          3L,   "dead",     355,    5,
+                          3L,  "press",     155,    3
                        ) %>% 
-  mutate(calc1RM = weight*reps*0.0333 + weight)
+  mutate(calc1RM = weight*reps*0.0333 + weight) %>% 
+  filter(complete.cases(.))
 
 ```
 
@@ -127,4 +131,32 @@ accomplished %>%
   labs(x = "Week",
        y = "Calculated 1RM")
 ```
+
+
+## Saving data
+
+Adding in a date column to match with week. 
+
+```{r}
+dates <- tibble::tribble(
+  ~week, ~date,
+   1,     "2019-02-12",
+   2,     "2019-02-19",
+   3,     "2019-02-26"
+) %>%
+  mutate(date = ymd(date))
+```
+
+
+```{r}
+lift_tbl <- left_join(accomplished, dates) %>% 
+  select(week, date, lift:calc1RM)
+```
+
+```{r}
+write.csv(x = lift_tbl, file = "data/2019-02-12_lift-data.csv",
+          quote = FALSE, row.names = FALSE)
+```
+
+
 

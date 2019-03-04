@@ -1,0 +1,46 @@
+---
+title: "Lifts summary"
+author: "Derek"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    code_folding: hide
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(magrittr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+library(readr)
+```
+
+
+## Loading in the data
+
+Loading in the saved csvs from previous rounds of 5/3/1.
+
+```{r}
+dat_csvs <- Sys.glob("data/*")
+
+lifts <- lapply(dat_csvs,
+                function(x) suppressMessages(read_csv(x)) ) %>%
+  bind_rows()
+```
+
+
+
+## Let's make a plot!
+
+```{r}
+lifts %>% 
+    ggplot(aes(x = date, y = calc1RM)) + 
+  geom_line(aes(group = lift, color = lift), size = 2) +
+  labs(x = "Date",
+       y = "Calculated 1RM")
+```
+
