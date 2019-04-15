@@ -36,7 +36,7 @@ If incrementing from a previous round, add 10 to squat / deadlift, 5 to bench or
 
 ```{r}
 lifts <- data.frame(lift =        c("fsquat", "bench", "dead", "press"),
-                    training_max = c(195,     215,     375,    165))
+                    training_max = c(215,     225,     395,    170))
 ```
 
 ## Calculating lifts
@@ -106,9 +106,21 @@ handcrafted data entry:
 ```{r}
 accomplished <- 
   # replace with tibble created above  
-  # place cursor below, and run code chunk above
-  
-  %>% 
+  tibble::tribble(
+    ~week,    ~lift, ~weight, ~reps,
+       1L, "fsquat",     185,    NA,
+       1L,  "bench",     190,    NA,
+       1L,   "dead",     335,    NA,
+       1L,  "press",     145,    NA,
+       2L, "fsquat",     195,    NA,
+       2L,  "bench",     200,    NA,
+       2L,   "dead",     355,    NA,
+       2L,  "press",     155,    NA,
+       3L, "fsquat",     205,    NA,
+       3L,  "bench",     215,    NA,
+       3L,   "dead",     375,    NA,
+       3L,  "press",     160,    NA
+    ) %>% 
   mutate(calc1RM = weight*reps*0.0333 + weight) %>% 
   filter(complete.cases(.))
 
@@ -135,9 +147,9 @@ Adding in a date column to match with week.
 ```{r}
 dates <- tibble::tribble(
   ~week, ~date,
-   1,     "2019-02-12",
-   2,     "2019-02-19",
-   3,     "2019-02-26"
+   1,     "2019-04-15",
+   2,     "2019-04-22",
+   3,     "2019-04-29"
 ) %>%
   mutate(date = ymd(date))
 ```
@@ -149,7 +161,7 @@ lift_tbl <- left_join(accomplished, dates) %>%
 ```
 
 ```{r}
-write.csv(x = lift_tbl, file = "data/2019-template_lift-data.csv",
+write.csv(x = lift_tbl, file = "data/2019-04_lift-data.csv",
           quote = FALSE, row.names = FALSE)
 ```
 
