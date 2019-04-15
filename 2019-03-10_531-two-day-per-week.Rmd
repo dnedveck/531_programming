@@ -105,18 +105,18 @@ handcrafted data entry:
 ```{r}
 accomplished <- tibble::tribble(
   ~week,    ~lift, ~weight, ~reps,
-     1L, "fsquat",     175,    NA,
-     1L,  "bench",     185,    NA,
-     1L,   "dead",     325,    NA,
-     1L,  "press",     145,    NA,
-     2L, "fsquat",     185,    NA,
-     2L,  "bench",     200,    NA,
-     2L,   "dead",     345,    NA,
-     2L,  "press",     155,    NA,
-     3L, "fsquat",     195,    NA,
-     3L,  "bench",     210,    NA,
-     3L,   "dead",     365,    NA,
-     3L,  "press",     160,    NA
+     1L, "fsquat",     175,    5,
+     1L,  "bench",     185,    8,
+     1L,   "dead",     325,    6,
+     1L,  "press",     145,    5,
+     2L, "fsquat",     185,    5,
+     2L,  "bench",     200,    5,
+     2L,   "dead",     345,    5,
+     2L,  "press",     155,    4,
+     3L, "fsquat",     195,    4,
+     3L,  "bench",     210,    4,
+     3L,   "dead",     365,    5,
+     3L,  "press",     160,    2
   ) %>% 
   mutate(calc1RM = weight*reps*0.0333 + weight) %>% 
   filter(complete.cases(.))
@@ -144,9 +144,9 @@ Adding in a date column to match with week.
 ```{r}
 dates <- tibble::tribble(
   ~week, ~date,
-   1,     "2019-02-12",
-   2,     "2019-02-19",
-   3,     "2019-02-26"
+   1,     "2019-03-18",
+   2,     "2019-03-25",
+   3,     "2019-04-01"
 ) %>%
   mutate(date = ymd(date))
 ```
@@ -158,7 +158,7 @@ lift_tbl <- left_join(accomplished, dates) %>%
 ```
 
 ```{r}
-write.csv(x = lift_tbl, file = "data/2019-template_lift-data.csv",
+write.csv(x = lift_tbl, file = "data/2019-03_lift-data.csv",
           quote = FALSE, row.names = FALSE)
 ```
 
